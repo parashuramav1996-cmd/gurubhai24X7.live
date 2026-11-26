@@ -1,0 +1,266 @@
+
+
+
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Exchange Dashboard UI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+
+    /* Top Bar */
+    .topbar {
+      background: #1e293b;
+      border-bottom: 2px solid #eab308;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .logo { font-size: 20px; font-weight: 800; color: #eab308; }
+    .search-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 7px 12px;
+      border-radius: 6px;
+      min-width: 220px;
+    }
+    .auth-btns { display: flex; gap: 8px; }
+    .btn {
+      padding: 7px 14px;
+      border: none;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-gold { background: #eab308; color: #0f172a; }
+    .btn-dark { background: #334155; color: #f8fafc; }
+
+    /* Sub Nav */
+    .subnav {
+      background: #111827;
+      padding: 8px 20px;
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      border-bottom: 1px solid #1f2937;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .tab-btn.active { color: #eab308; border-bottom: 2px solid #eab308; }
+
+    /* Main Layout */
+    .container {
+      max-width: 1200px;
+      margin: 18px auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 200px 1fr 270px;
+      gap: 16px;
+    }
+    .panel {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-head {
+      background: #0f172a;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #eab308;
+      border-bottom: 1px solid #334155;
+    }
+
+    /* Sidebar */
+    .menu-list { list-style: none; }
+    .menu-list li {
+      padding: 10px 14px;
+      border-bottom: 1px solid #263349;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .menu-list li:hover { background: #263349; }
+
+    /* Market Table */
+    .match-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid #334155;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .match-meta { font-size: 12px; color: #94a3b8; }
+    .live-dot {
+      display: inline-block;
+      background: #22c55e;
+      color: #052e16;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-right: 6px;
+    }
+    .odds-wrap { display: flex; gap: 6px; }
+    .odd {
+      width: 58px;
+      padding: 6px 4px;
+      border: none;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      color: #0f172a;
+    }
+    .back { background: #7dd3fc; }
+    .lay { background: #f9a8d4; }
+
+    /* Slip Box */
+    .slip-body { padding: 14px; font-size: 13px; }
+    .slip-body input {
+      width: 100%;
+      padding: 7px;
+      margin: 8px 0;
+      border-radius: 4px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">GURUBHAI247 LIVE UI</div>
+    <input type="text" class="search-box" id="searchInput" placeholder="Match athava team huduki..." />
+    <div class="auth-btns">
+      <button class="btn btn-dark" onclick="alert('Login modal illi open aaguttade')">Login</button>
+      <button class="btn btn-gold" onclick="alert('Demo ID mode active')">Demo ID</button>
+    </div>
+  </header>
+
+  <div class="subnav">
+    <button class="tab-btn active" data-sport="all">All Sports</button>
+    <button class="tab-btn" data-sport="Cricket">Cricket</button>
+    <button class="tab-btn" data-sport="Football">Football</button>
+    <button class="tab-btn" data-sport="Tennis">Tennis</button>
+  </div>
+
+  <main class="container">
+    <!-- Left Sidebar -->
+    <aside class="panel">
+      <div class="panel-head">Sports Menu</div>
+      <ul class="menu-list">
+        <li onclick="filterSport('all')">In-Play (All)</li>
+        <li onclick="filterSport('Cricket')">Cricket</li>
+        <li onclick="filterSport('Football')">Football</li>
+        <li onclick="filterSport('Tennis')">Tennis</li>
+      </ul>
+    </aside>
+
+    <!-- Center Live Markets -->
+    <section class="panel">
+      <div class="panel-head">In-Play Live Markets</div>
+      <div id="matchList"></div>
+    </section>
+
+    <!-- Right Preview Slip -->
+    <aside class="panel">
+      <div class="panel-head">Selection Calculator</div>
+      <div class="slip-body" id="slipBox">
+        <p style="color:#94a3b8;">Yaavudadaru Back athava Lay rate click maadi.</p>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const matches = [
+      { sport: "Cricket", title: "Royal Challengers Bengaluru v Gujarat Titans", status: "LIVE", back1: 1.84, lay1: 1.86 },
+      { sport: "Cricket", title: "India v Australia - T20", status: "LIVE", back1: 1.62, lay1: 1.65 },
+      { sport: "Football", title: "Bengaluru FC v Mohun Bagan", status: "LIVE", back1: 2.20, lay1: 2.26 },
+      { sport: "Tennis", title: "ATP Masters - Center Court", status: "UPCOMING", back1: 1.95, lay1: 2.00 }
+    ];
+
+    let activeSport = "all";
+
+    function renderMatches() {
+      const q = document.getElementById("searchInput").value.toLowerCase();
+      const container = document.getElementById("matchList");
+      container.innerHTML = "";
+
+      matches
+        .filter(m => (activeSport === "all" || m.sport === activeSport) && m.title.toLowerCase().includes(q))
+        .forEach(m => {
+          const row = document.createElement("div");
+          row.className = "match-row";
+          row.innerHTML = `
+            <div>
+              <div><span class="live-dot">${m.status}</span><strong>${m.title}</strong></div>
+              <div class="match-meta">${m.sport} • Match Odds</div>
+            </div>
+            <div class="odds-wrap">
+              <button class="odd back" onclick="selectOdd('${m.title}', 'Back', ${m.back1})">${m.back1}</button>
+              <button class="odd lay" onclick="selectOdd('${m.title}', 'Lay', ${m.lay1})">${m.lay1}</button>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+    }
+
+    function filterSport(sport) {
+      activeSport = sport;
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.sport === sport);
+      });
+      renderMatches();
+    }
+
+    function selectOdd(match, type, rate) {
+      const slip = document.getElementById("slipBox");
+      slip.innerHTML = `
+        <div><strong>${match}</strong></div>
+        <div style="margin-top:4px;">Type: <strong>${type}</strong> @ <strong>${rate}</strong></div>
+        <input type="number" id="stakeInput" value="100" min="10" oninput="calcReturn(${rate})" />
+        <div>Estimated Return: <strong id="retVal">${(100 * rate).toFixed(2)}</strong></div>
+      `;
+    }
+
+    function calcReturn(rate) {
+      const val = parseFloat(document.getElementById("stakeInput").value) || 0;
+      document.getElementById("retVal").textContent = (val * rate).toFixed(2);
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => filterSport(btn.dataset.sport));
+    });
+    document.getElementById("searchInput").addEventListener("input", renderMatches);
+
+    renderMatches();
+  </script>
+</body>
+</html>
+
